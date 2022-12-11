@@ -1,0 +1,41 @@
+version: "3.9"
+
+networks:
+  algalog-network:
+    driver: bridge
+
+volumes:
+  algalog-mysql:
+
+services:
+  algalog-mysql:
+    platform: linux/x86_64
+    image: mysql
+    container_name: algalog-db
+    environment:
+      MYSQL_DATABASE: algalog
+      MYSQL_USERNAME: root
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ROOT_PASSWORD: ""
+    ports:
+      - 3307:3306
+    volumes:
+      - algalog-mysql:/var/lib/mysql
+    networks:
+      - algalog-network
+
+  algalog-api:
+    image: algalog-api
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: algalog-api
+    restart: always
+    environment:
+      DB_HOST: algalog-db
+    ports:
+      - 8080:8080
+    depends_on:
+      - algalog-mysql
+    networks:
+      - algalog-network
